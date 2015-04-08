@@ -91,8 +91,8 @@ public class ConncurentMemoryServerTrack implements ServerTrack {
     @Override
     public AverageLoadValues getLoad(final String serverName, final long end) {
         final AverageLoadValues ret = new AverageLoadValues(serverName);
-        averageBuckets(end, loadValuesMap.get(ret.getServerName()), BucketDuration.Hour, ret.getByHour());
-        averageBuckets(end, loadValuesMap.get(ret.getServerName()), BucketDuration.Minute, ret.getByMinute());
+        averageBuckets(end, loadValuesMap.get(serverName), BucketDuration.Hour, ret.getByHour());
+        averageBuckets(end, loadValuesMap.get(serverName), BucketDuration.Minute, ret.getByMinute());
         return ret;
     }
     /**
@@ -103,7 +103,14 @@ public class ConncurentMemoryServerTrack implements ServerTrack {
      * A helper method to fill the buckets
      * 
      * TODO: is there a more efficient way to pull the data from the lists? The 
-     * current strategy iterates through 84 times.
+     * current strategy iterates through the queue 84 times. How well does a 
+     * Queue perform as a Stream? Need to investigate
+     * 
+     * Question: are the time buckets aligned with actual minutes and hours? If
+     * so significant work will need to be done here (and in the tests to avoid 
+     * border conditions). I choose not-aligned as that gives a consistent average
+     * through all buckets, including the first and last which might otherwise be
+     * truncated.
      * 
      * @param end the timestamp to start with (usually now)
      * @param lvs the load values to iterate through

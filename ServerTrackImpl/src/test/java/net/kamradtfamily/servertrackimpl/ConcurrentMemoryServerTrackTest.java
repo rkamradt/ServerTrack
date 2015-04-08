@@ -41,7 +41,6 @@ import static org.junit.Assert.*;
  */
 public class ConcurrentMemoryServerTrackTest {
     Random r = new Random(new Date().getTime());
-    private final static String servername = "testserver";
     public ConcurrentMemoryServerTrackTest() {
     }
     
@@ -66,8 +65,8 @@ public class ConcurrentMemoryServerTrackTest {
      */
     @Test
     public void testSimpleRecordAndGetLoad() {
-        System.out.println("record");
-        String serverName = "";
+        System.out.println("simple record and getLoad");
+        String serverName = "testserver1";
         double cpuLoad = r.nextDouble()+1; // prevent zero load to help find first load in buckets
         double ramLoad = r.nextDouble()+1;
         ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
@@ -80,22 +79,55 @@ public class ConcurrentMemoryServerTrackTest {
         assertNotNull(alv.getByMinute());
         assertEquals(ServerTrack.HOUR_BUCKETS, alv.getByHour().size());
         assertEquals(ServerTrack.MINUTE_BUCKETS, alv.getByMinute().size());
-        int firstIndex = 0; // check in first and second buckets in case of border condition
-        if(alv.getByHour().get(0).getCpuLoad() == 0.0) {
-            firstIndex++;
-        }
-        LoadValue lv = alv.getByHour().get(firstIndex);
+        // because minute and hour buckets are not aligned, it will always land in first bucket (unless it takes a minute to proccess).
+        LoadValue lv = alv.getByHour().get(0); 
+        assertEquals(cpuLoad, lv.getCpuLoad(), 0.0);
+        assertEquals(ramLoad, lv.getRamLoad(), 0.0);
+        lv = alv.getByMinute().get(0);
         assertEquals(cpuLoad, lv.getCpuLoad(), 0.0);
         assertEquals(ramLoad, lv.getRamLoad(), 0.0);
         
-        firstIndex = 0; // check in first and second buckets in case of border condition
-        if(alv.getByHour().get(0).getCpuLoad() == 0.0) {
-            firstIndex++;
-        }
-        lv = alv.getByHour().get(firstIndex);
-        assertEquals(cpuLoad, lv.getCpuLoad(), 0.0);
-        assertEquals(ramLoad, lv.getRamLoad(), 0.0);
+    }
+    /**
+     * Test of record and getLoad method, with two servers.
+     */
+    @Test
+    public void testTwoServerRecordAndGetLoad() {
+        System.out.println("record and getLoad with two servers");
+        ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
+        // record data for first server
+        String serverName1 = "testserver1";
+        double cpuLoad1 = r.nextDouble()+1; // prevent zero load to help find first load in buckets
+        double ramLoad1 = r.nextDouble()+1;
+        instance.record(serverName1, new LoadValue(cpuLoad1, ramLoad1), new Date().getTime());
+        // record data for second server
+        String serverName2 = "testserver2";
+        double cpuLoad2 = r.nextDouble()+1; // prevent zero load to help find first load in buckets
+        double ramLoad2 = r.nextDouble()+1;
+        instance.record(serverName2, new LoadValue(cpuLoad2, ramLoad2), new Date().getTime());
+        // check first server results
+        AverageLoadValues alv = instance.getLoad(serverName1, new Date().getTime());
+        assertEquals(serverName1, alv.getServerName());
+        assertNotNull(alv.getByHour());
+        assertNotNull(alv.getByMinute());
+        assertEquals(ServerTrack.HOUR_BUCKETS, alv.getByHour().size());
+        assertEquals(ServerTrack.MINUTE_BUCKETS, alv.getByMinute().size());
+        LoadValue lv = alv.getByHour().get(0);
+        System.out.println("cpu server1: " + lv.getCpuLoad() + " ram server1: " + lv.getRamLoad());
+        assertEquals(cpuLoad1, lv.getCpuLoad(), 0.0);
+        assertEquals(ramLoad1, lv.getRamLoad(), 0.0);
         
+        // check second server results
+        alv = instance.getLoad(serverName2, new Date().getTime());
+        assertEquals(serverName2, alv.getServerName());
+        assertNotNull(alv.getByHour());
+        assertNotNull(alv.getByMinute());
+        assertEquals(ServerTrack.HOUR_BUCKETS, alv.getByHour().size());
+        assertEquals(ServerTrack.MINUTE_BUCKETS, alv.getByMinute().size());
+        lv = alv.getByHour().get(0);
+        System.out.println("cpu server2: " + lv.getCpuLoad() + " ram server2: " + lv.getRamLoad());
+        assertEquals(cpuLoad2, lv.getCpuLoad(), 0.0);
+        assertEquals(ramLoad2, lv.getRamLoad(), 0.0);
     }
 
 }
