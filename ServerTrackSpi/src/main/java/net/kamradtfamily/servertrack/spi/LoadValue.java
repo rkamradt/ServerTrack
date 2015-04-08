@@ -29,7 +29,9 @@ import java.util.Date;
 
 /**
  *
- * A representation of load for a particular time
+ * A representation of load for a particular time. 
+ * I could not make this a read-only bean since it needs to be serialized
+ * into JSON
  * 
  * @author randalkamradt
  * @see ServerTrack

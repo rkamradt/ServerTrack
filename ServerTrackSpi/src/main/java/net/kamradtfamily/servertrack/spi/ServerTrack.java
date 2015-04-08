@@ -59,7 +59,7 @@ public interface ServerTrack {
      * 
      * @param serverName the name of the server
      * @param loadValue the loads
-     * @param timestamp
+     * @param timestamp the time of the record, presumably now
      * @return An AverageLoadValues bean with the averages filled in
      */
     LoadValue record(String serverName, LoadValue loadValue, long timestamp);
@@ -68,7 +68,7 @@ public interface ServerTrack {
      * get the average load in minute and hour buckets for a server
      * 
      * @param serverName the name of the server
-     * @param end the end time for the buckets (highest value)
+     * @param end the end time for the buckets (highest value), presumably now
      * @return An AverageLoadValues bean with the averages filled in
      */
     AverageLoadValues getLoad(String serverName, long end);
