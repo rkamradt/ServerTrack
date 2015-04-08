@@ -71,7 +71,7 @@ public class ConcurrentMemoryServerTrackTest {
         double cpuLoad = r.nextDouble()+1; // prevent zero load to help find first load in buckets
         double ramLoad = r.nextDouble()+1;
         ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
-        LoadValue ret = instance.record(serverName, new LoadValue(cpuLoad, ramLoad));
+        LoadValue ret = instance.record(serverName, new LoadValue(cpuLoad, ramLoad), new Date().getTime());
         assertEquals(cpuLoad, ret.getCpuLoad(), 0.0);
         assertEquals(ramLoad, ret.getRamLoad(), 0.0);
         AverageLoadValues alv = instance.getLoad(serverName, new Date().getTime());

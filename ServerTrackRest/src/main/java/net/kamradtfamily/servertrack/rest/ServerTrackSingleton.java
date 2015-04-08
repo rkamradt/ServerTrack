@@ -28,13 +28,24 @@ import net.kamradtfamily.servertrackimpl.ConncurentMemoryServerTrack;
 
 /**
  *
+ * A Singleton that represents the API. This *should* be loaded as part of the
+ * webapp initialization logic, especially if it will need to take parameters.
+ * But it should work fine as is, and will be initialized on the first request. 
+ * Because it is initialized on a request thread, the creation of the singleton
+ * must be synchronized.
+ * 
  * @author randalkamradt
+ * @since 1.0
  */
 public class ServerTrackSingleton {
     static ServerTrack theServerTrack;
     static ServerTrack getTheServerTrack() {
         if(theServerTrack == null) {
-            theServerTrack = new ConncurentMemoryServerTrack();
+            synchronized(ServerTrackSingleton.class) {  // ensure that only one thread creates the singleton
+                if(theServerTrack == null) { // double check in case another thread snuck in and set it.
+                    theServerTrack = new ConncurentMemoryServerTrack();
+                }
+            }
         }
         return theServerTrack;
     }

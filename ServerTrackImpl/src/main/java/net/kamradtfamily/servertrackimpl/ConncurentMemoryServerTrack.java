@@ -23,10 +23,11 @@
  */
 package net.kamradtfamily.servertrackimpl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import net.kamradtfamily.servertrack.spi.AverageLoadValues;
 import net.kamradtfamily.servertrack.spi.LoadValue;
 import net.kamradtfamily.servertrack.spi.ServerTrack;
@@ -34,47 +35,87 @@ import net.kamradtfamily.servertrack.spi.ServerTrack;
 /**
  *
  * An implementation of ServerTrack that uses a simple in-memory scheme to store values
+ * This implementation is thread-safe by using the ConcurrentHashMap, and ConcurrentLinkedQueue
  * 
  * @author randalkamradt
  * @see ServerTrack
  * @since 1.0
  */
 public class ConncurentMemoryServerTrack implements ServerTrack {
+    /**
+     * number of milliseconds in an hour
+     */
     public static final long HOUR_OFFSET = 1000*60*60;
+    /**
+     * number of milliseconds in a minute
+     */
     public static final long MINUTE_OFFSET = 1000*60;
     /**
      * The map of server names and load values. This map is relatively static as it
      * is only modified when a new server is encountered, so the choice of concurrency type 
      * should have minimal impact.
      */
-    private final Map<String, List<LoadValue>> loadValuesMap = new ConcurrentHashMap<>(); 
+    private final Map<String, Queue<LoadValue>> loadValuesMap = new ConcurrentHashMap<>(); 
+    /**
+     * 
+     * Add a record to the store
+     * 
+     * @param serverName the name of the server
+     * @param input the input values in the form of a LoadValue object
+     * @param timestamp the timestamp in milliseconds
+     * @return 
+     */
     @Override
-    public LoadValue record(final String serverName, LoadValue input) {
-        List<LoadValue> loadValues = loadValuesMap.get(serverName);
+    public LoadValue record(final String serverName, final LoadValue input, final long timestamp) {
+        Queue<LoadValue> loadValues = loadValuesMap.get(serverName);
         if(loadValues == null) {
-            loadValues = new ArrayList<>(); // should this be array list?
+            loadValues = new ConcurrentLinkedQueue<>(); // use a deque since we are adding to the tail and removing from the head
             loadValuesMap.put(serverName, loadValues);
         }
-        LoadValue loadValue = new LoadValue(input.getCpuLoad(), input.getRamLoad());
-        loadValues.add(loadValue); // todo synchronize this call
-        // TODO remove load values that have expired (past the 24 hour point
+        LoadValue loadValue = new LoadValue(input.getCpuLoad(), input.getRamLoad(), timestamp);
+        loadValues.add(loadValue); 
+        final long minTime = timestamp - ServerTrack.HOUR_BUCKETS*HOUR_OFFSET;
+        while(loadValues.peek().getTimestamp() < minTime) { // we should be safe that there is one item on the queue, so it should never return null
+            loadValues.poll(); // remove
+        }
         return loadValue;
     }
-
+    /**
+     * 
+     * Get an average in hourly and minute buckets for a server
+     * 
+     * @param serverName the name of the server
+     * @param end the timestamp (usually now) to start the buckets
+     * @return 
+     */
     @Override
     public AverageLoadValues getLoad(final String serverName, final long end) {
         final AverageLoadValues ret = new AverageLoadValues(serverName);
-        averageBuckets(end, ret, BucketDuration.Hour, ServerTrack.HOUR_BUCKETS, ret.getByHour());
-        averageBuckets(end, ret, BucketDuration.Minute, ServerTrack.MINUTE_BUCKETS, ret.getByMinute());
+        averageBuckets(end, loadValuesMap.get(ret.getServerName()), BucketDuration.Hour, ret.getByHour());
+        averageBuckets(end, loadValuesMap.get(ret.getServerName()), BucketDuration.Minute, ret.getByMinute());
         return ret;
     }
+    /**
+     * An hour and minute enumeration to help in the averageBuckets method
+     */
     private enum BucketDuration { Hour, Minute };
-    private void averageBuckets(final long end, final AverageLoadValues ret, final BucketDuration bucketDuration, final int bucketNumber, final List<LoadValue> averageLoad) {
-        List<LoadValue> lvs = loadValuesMap.get(ret.getServerName());
+    /**
+     * A helper method to fill the buckets
+     * 
+     * TODO: is there a more efficient way to pull the data from the lists? The 
+     * current strategy iterates through 84 times.
+     * 
+     * @param end the timestamp to start with (usually now)
+     * @param lvs the load values to iterate through
+     * @param bucketDuration Hour or Minute
+     * @param averageLoad 
+     */
+    private void averageBuckets(final long end, final Queue<LoadValue> lvs, final BucketDuration bucketDuration, final List<LoadValue> averageLoad) {
+        final int bucketNumber = bucketDuration == BucketDuration.Hour ? ServerTrack.HOUR_BUCKETS : ServerTrack.MINUTE_BUCKETS;
         long localEnd = end;
         for(int i = 0; i < bucketNumber; i++) {
             final long fend = localEnd;
-            final long fstart = bucketDuration == BucketDuration.Hour ? HOUR_OFFSET : MINUTE_OFFSET;
+            final long fstart = bucketDuration == BucketDuration.Hour ? -HOUR_OFFSET : -MINUTE_OFFSET;
             double cpu = lvs.stream().
                     filter(l -> l.inRange(fstart, fend)).
                     mapToDouble(l -> l.getCpuLoad()).

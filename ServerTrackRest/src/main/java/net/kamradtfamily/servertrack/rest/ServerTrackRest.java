@@ -12,16 +12,20 @@ import net.kamradtfamily.servertrack.spi.LoadValue;
 import net.kamradtfamily.servertrack.spi.ServerTrack;
 
 /**
- *
+ * A RESTful Webservice object. Two entry points POST and GET. Both take a
+ * servername as the last-leg of the path. POST creates a timestamped load 
+ * entry, and GET will return a list of load entries in hourly and minute buckets.
+ * 
  * @author randalkamradt
+ * @since 1.0
  */
 @Path("/servertrack")
 public class ServerTrackRest {
 
     /**
-     *
-     * @param server
-     * @return
+     * Get the list of load entries for this server
+     * @param server the server name
+     * @return the JSON document with the lists of averaged loads.
      */
     @GET
     @Path("/{server}")
@@ -34,9 +38,11 @@ public class ServerTrackRest {
 
     /**
      *
-     * @param server
-     * @param input
-     * @return
+     * Add a single load record to the store.
+     * 
+     * @param server the name of the server
+     * @param input a JSON object that has the cpu and ram load.
+     * @return a JSON object that has the cpu and ram load, and a timestamp.
      */
     @POST
     @Produces("application/json")
@@ -44,7 +50,7 @@ public class ServerTrackRest {
     @Path("/{server}")
     public Response record(@PathParam("server") String server, LoadValue input) {
         ServerTrack serverTrack = ServerTrackSingleton.getTheServerTrack();
-        LoadValue lv = serverTrack.record(server, input); 
+        LoadValue lv = serverTrack.record(server, input, new Date().getTime()); 
         return Response.ok().entity(lv).build();
     }
 }

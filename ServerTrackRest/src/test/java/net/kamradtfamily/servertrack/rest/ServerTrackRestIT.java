@@ -17,7 +17,14 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
+/**
+ * 
+ * Test of the RESTful web service. Detailed testing of the service does not need
+ * to take place at this level as that is tested in the API unit tests. These tests only
+ * need to test the artifacts of the web service, correct parameter usage and return types
+ * 
+ * @author randalkamradt
+ */
 public class ServerTrackRestIT {
     private static String endpointUrl;
     Random rand = new Random(new Date().getTime());
@@ -26,7 +33,7 @@ public class ServerTrackRestIT {
     public static void beforeClass() {
         endpointUrl = System.getProperty("service.url");
     }
-        /**
+    /**
      * 
      * test POST methods
      * 
