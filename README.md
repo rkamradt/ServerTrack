@@ -1,6 +1,9 @@
 # ServerTrack
 A sample web-service that will track server statistics over time
 
+[ ![Codeship Status for rkamradt/MIDIExchange](https://www.codeship.io/projects/056fb4e0-c02a-0132-c1af-3aee2d6da065/status?branch=master)](https://www.codeship.io/projects/73154)
+
+
 This is a standard Maven Multi-module build. It requires Java 8 and Maven 3.2.5
 
 To build and run unit tests:
