@@ -11,9 +11,18 @@ import net.kamradtfamily.servertrack.spi.AverageLoadValues;
 import net.kamradtfamily.servertrack.spi.LoadValue;
 import net.kamradtfamily.servertrack.spi.ServerTrack;
 
+/**
+ *
+ * @author randalkamradt
+ */
 @Path("/servertrack")
 public class ServerTrackRest {
 
+    /**
+     *
+     * @param server
+     * @return
+     */
     @GET
     @Path("/{server}")
     @Produces("application/json")
@@ -23,6 +32,12 @@ public class ServerTrackRest {
         return Response.ok().entity(value).build();
     }
 
+    /**
+     *
+     * @param server
+     * @param input
+     * @return
+     */
     @POST
     @Produces("application/json")
     @Consumes("application/json")

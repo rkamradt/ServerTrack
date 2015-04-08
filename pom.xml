@@ -8,8 +8,7 @@
     <modules>
         <module>ServerTrackSpi</module>
         <module>ServerTrackImpl</module>
-    <module>ServerTrackRest</module>
-        <module>ServiceTrackFactory</module>
+        <module>ServerTrackRest</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
