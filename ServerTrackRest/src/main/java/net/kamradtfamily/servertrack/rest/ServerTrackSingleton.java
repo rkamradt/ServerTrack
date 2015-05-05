@@ -24,7 +24,7 @@
 package net.kamradtfamily.servertrack.rest;
 
 import net.kamradtfamily.servertrack.spi.ServerTrack;
-import net.kamradtfamily.servertrackimpl.ConncurentMemoryServerTrack;
+import net.kamradtfamily.servertrackimpl.ConcurentMemoryServerTrack;
 
 /**
  *
@@ -43,7 +43,7 @@ public class ServerTrackSingleton {
         if(theServerTrack == null) {
             synchronized(ServerTrackSingleton.class) {  // ensure that only one thread creates the singleton
                 if(theServerTrack == null) { // double check in case another thread snuck in and set it.
-                    theServerTrack = new ConncurentMemoryServerTrack();
+                    theServerTrack = new ConcurentMemoryServerTrack();
                 }
             }
         }

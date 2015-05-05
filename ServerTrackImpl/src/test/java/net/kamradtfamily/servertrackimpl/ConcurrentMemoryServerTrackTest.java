@@ -65,7 +65,7 @@ public class ConcurrentMemoryServerTrackTest {
     }
 
     /**
-     * Test of record and getLoad method, of class ConncurentMemoryServerTrack.
+     * Test of record and getLoad method, of class ConcurentMemoryServerTrack.
      */
     @Test
     public void testSimpleRecordAndGetLoad() {
@@ -73,7 +73,7 @@ public class ConcurrentMemoryServerTrackTest {
         String serverName = "testserver1";
         double cpuLoad = r.nextDouble()+1; // prevent zero load to help find first load in buckets
         double ramLoad = r.nextDouble()+1;
-        ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
+        ConcurentMemoryServerTrack instance = new ConcurentMemoryServerTrack();
         LoadValue ret = instance.record(serverName, new LoadValue(cpuLoad, ramLoad), new Date().getTime());
         assertEquals(cpuLoad, ret.getCpuLoad(), 0.0);
         assertEquals(ramLoad, ret.getRamLoad(), 0.0);
@@ -98,7 +98,7 @@ public class ConcurrentMemoryServerTrackTest {
     @Test
     public void testTwoServerRecordAndGetLoad() {
         System.out.println("record and getLoad with two servers");
-        ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
+        ConcurentMemoryServerTrack instance = new ConcurentMemoryServerTrack();
         // record data for first server
         String serverName1 = "testserver1";
         double cpuLoad1 = r.nextDouble()+1; // prevent zero load to help find first load in buckets
@@ -138,7 +138,7 @@ public class ConcurrentMemoryServerTrackTest {
     @Test
     public void testTwoEntryRecordAndGetLoad() {
         System.out.println("record and getLoad with two entries");
-        ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
+        ConcurentMemoryServerTrack instance = new ConcurentMemoryServerTrack();
         // record data for first server
         String serverName = "testserver";
         double cpuLoad1 = r.nextDouble()+1; // prevent zero load to help find first load in buckets
@@ -169,7 +169,7 @@ public class ConcurrentMemoryServerTrackTest {
     @Test
     public void testManyEntryHourRecordAndGetLoad() {
         System.out.println("record and getLoad with many entries by hour");
-        final ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
+        final ConcurentMemoryServerTrack instance = new ConcurentMemoryServerTrack();
         // record data for first server
         final String serverName = "testserver";
         final long fstarttime = new Date().getTime(); 
@@ -206,7 +206,7 @@ public class ConcurrentMemoryServerTrackTest {
     @Test
     public void testManyEntryMinuteRecordAndGetLoad() {
         System.out.println("record and getLoad with many entries by minute");
-        final ConncurentMemoryServerTrack instance = new ConncurentMemoryServerTrack();
+        final ConcurentMemoryServerTrack instance = new ConcurentMemoryServerTrack();
         // record data for first server
         final String serverName = "testserver";
         final long fstarttime = new Date().getTime(); 

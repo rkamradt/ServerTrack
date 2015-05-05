@@ -41,7 +41,7 @@ import net.kamradtfamily.servertrack.spi.ServerTrack;
  * @see ServerTrack
  * @since 1.0
  */
-public class ConncurentMemoryServerTrack implements ServerTrack {
+public class ConcurentMemoryServerTrack implements ServerTrack {
     /**
      * number of milliseconds in an hour
      */
